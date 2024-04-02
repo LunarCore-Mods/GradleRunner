@@ -2,9 +2,8 @@ package io.github.yuko1101.lunarcorerunner
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.tasks.JavaExec
 import java.io.File
-
-
 
 abstract class LunarCoreRunnerPlugin : Plugin<Project> {
     override fun apply(project: Project) {
@@ -40,9 +39,9 @@ abstract class LunarCoreRunnerPlugin : Plugin<Project> {
         gameproviderLibrary.exclude(mapOf("module" to "gson"))
         gameproviderLibrary.exclude(mapOf("module" to "guava"))
 
-        project.tasks.register("runServer", RunServerTask::class.java) {
-            it.dependsOn("jar")
-            it.doFirst { _ ->
+        project.tasks.register("runServer", JavaExec::class.java) { task ->
+            task.dependsOn("jar")
+            task.doFirst { _ ->
                 val modFile: File = project.tasks.getByName("jar").outputs.files.singleFile
                 val lunarCoreFile: File = lunarcore.files.first()
                 val gameProvider: File = gameprovider.singleFile
@@ -56,16 +55,25 @@ abstract class LunarCoreRunnerPlugin : Plugin<Project> {
 
                 modFile.copyTo(File(modsDir, modFile.name), true)
 
-                lunarCoreFile.copyTo(File(runDir, lunarCoreFile.name), true)
-                gameProvider.copyTo(File(runDir, gameProvider.name), true)
+                val lunarCoreJar = File(runDir, lunarCoreFile.name)
+                val gameProviderJar = File(runDir, gameProvider.name)
+                lunarCoreFile.copyTo(lunarCoreJar, true)
+                gameProvider.copyTo(gameProviderJar, true)
 
-                gameProviderLibraries.forEach { library ->
-                    library.copyTo(File(librariesDir, library.name), true)
+                val libraryJars: List<File> = gameProviderLibraries.map { library ->
+                    val to = File(librariesDir, library.name)
+                    library.copyTo(to, true)
+                    to
                 }
 
-                // TODO: run server
-
+                task.workingDir = runDir
+                task.classpath = project.files(lunarCoreJar, gameProviderJar, *libraryJars.toTypedArray())
             }
+
+            task.mainClass.set("io.github.yuko1101.provider.Main")
+            println(task.commandLine.joinToString(" "))
+
+            // TODO: make not to stop the task while running the server
         }
     }
 }
