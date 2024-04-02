@@ -11,14 +11,14 @@ abstract class LunarCoreRunnerPlugin : Plugin<Project> {
         val implementation = project.configurations.getByName("implementation")
         implementation.isCanBeResolved = true
         
-        project.configurations.create("lunarcore") {
+        val lunarcore = project.configurations.create("lunarcore") {
             implementation.extendsFrom(it)
         }
-        project.configurations.create("gameprovider") {
+        val gameprovider = project.configurations.create("gameprovider") {
             implementation.extendsFrom(it)
         }
         // does not extend implementation not to add any dependencies to the mod
-        project.configurations.create("gameproviderLibrary")
+        val gameproviderLibrary = project.configurations.create("gameproviderLibrary")
 
         // TODO: better way to get version
         val defaultMixinVersion = "0.12.5+mixin.0.8.5"
@@ -37,14 +37,16 @@ abstract class LunarCoreRunnerPlugin : Plugin<Project> {
 
         project.repositories.add(project.repositories.maven { it.url = project.uri("https://maven.fabricmc.net") })
         project.dependencies.add("gameproviderLibrary", "net.fabricmc:sponge-mixin:$mixinVersion")
+        gameproviderLibrary.exclude(mapOf("module" to "gson"))
+        gameproviderLibrary.exclude(mapOf("module" to "guava"))
 
         project.tasks.register("runServer", RunServerTask::class.java) {
             it.dependsOn("jar")
             it.doFirst { _ ->
                 val modFile: File = project.tasks.getByName("jar").outputs.files.singleFile
-                val lunarCoreFile: File = project.configurations.getByName("lunarcore").files.first()
-                val gameProvider: File = project.configurations.getByName("gameprovider").singleFile
-                val gameProviderLibraries: List<File> = project.configurations.getByName("gameproviderLibrary").toList()
+                val lunarCoreFile: File = lunarcore.files.first()
+                val gameProvider: File = gameprovider.singleFile
+                val gameProviderLibraries: List<File> = gameproviderLibrary.toList()
 
                 val runDir = project.file("run")
                 val librariesDir = File(runDir, "libraries")
@@ -62,6 +64,7 @@ abstract class LunarCoreRunnerPlugin : Plugin<Project> {
                 }
 
                 // TODO: run server
+
             }
         }
     }
