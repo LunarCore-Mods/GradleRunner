@@ -4,6 +4,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.JavaExec
 import java.io.File
+import java.nio.file.Paths
 import java.util.jar.JarInputStream
 import java.util.jar.Manifest
 
@@ -78,7 +79,8 @@ abstract class LunarCoreRunnerPlugin : Plugin<Project> {
             } ?: throw IllegalStateException("Main-Class not found in the manifest of the mod jar")
             task.mainClass.set(mainClass)
 
-            println(task.commandLine.joinToString(" "))
+            val cp = task.classpath.joinToString(";") { runDir.toPath().relativize(it.toPath()).toString() }
+            File(runDir, "args.txt").writeText("-cp $cp\n${mainClass}")
 
             task.setStandardInput(System.`in`)
             task.setIgnoreExitValue(true)
