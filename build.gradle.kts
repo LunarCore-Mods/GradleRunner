@@ -1,7 +1,7 @@
 plugins {
     kotlin("jvm") version "1.9.23"
     `java-gradle-plugin`
-
+    `maven-publish`
 }
 
 group = "io.github.yuko1101"
