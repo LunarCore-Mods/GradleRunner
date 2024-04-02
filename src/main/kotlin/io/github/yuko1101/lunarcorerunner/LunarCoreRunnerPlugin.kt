@@ -73,7 +73,8 @@ abstract class LunarCoreRunnerPlugin : Plugin<Project> {
             task.mainClass.set("io.github.yuko1101.provider.Main")
             println(task.commandLine.joinToString(" "))
 
-            // TODO: make not to stop the task while running the server
+            task.setStandardInput(System.`in`)
+            task.setIgnoreExitValue(true)
         }
     }
 }
