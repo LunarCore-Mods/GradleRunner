@@ -79,6 +79,9 @@ abstract class LunarCoreRunnerPlugin : Plugin<Project> {
             } ?: throw IllegalStateException("Main-Class not found in the manifest of the mod jar")
             task.mainClass.set(mainClass)
 
+            // loads mods from classpath
+            task.jvmArgs("-Dfabric.development=true")
+
             val cp = task.classpath.joinToString(";") { runDir.toPath().relativize(it.toPath()).toString() }
             File(runDir, "args.txt").writeText("-cp $cp\n${mainClass}")
 
