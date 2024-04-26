@@ -1,6 +1,7 @@
 package io.github.yuko1101.lunarcorerunner
 
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
@@ -13,6 +14,8 @@ import java.util.jar.Manifest
 abstract class RunServerTask : JavaExec() {
     @OutputDirectory
     val runDir: Property<File> = this.objectFactory.property(File::class.java).apply { set(project.file("run")) }
+    @Input
+    val putModJar: Property<Boolean> = this.objectFactory.property(Boolean::class.java).apply { set(true) }
 
     init {
         this.dependsOn("jar")
@@ -42,7 +45,8 @@ abstract class RunServerTask : JavaExec() {
         val modsDir = File(runDir, "mods")
         if (!modsDir.exists()) modsDir.mkdir()
 
-        val modFile = project.tasks.getByName("jar").outputs.files.singleFile
+        var modFile = project.tasks.getByName("jar").outputs.files.singleFile
+        if (putModJar.get()) modFile = modFile.copyTo(File(modsDir, modFile.name), true)
 
         val lunarCoreJar = File(runDir, lunarCoreFile.name)
         lunarCoreFile.copyTo(lunarCoreJar, true)
