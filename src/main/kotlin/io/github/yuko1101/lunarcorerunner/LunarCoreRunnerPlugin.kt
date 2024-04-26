@@ -3,9 +3,6 @@ package io.github.yuko1101.lunarcorerunner
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
-import java.io.File
-import java.util.jar.JarInputStream
-import java.util.jar.Manifest
 
 abstract class LunarCoreRunnerPlugin : Plugin<Project> {
 
@@ -13,7 +10,6 @@ abstract class LunarCoreRunnerPlugin : Plugin<Project> {
         lateinit var lunarcore: Configuration
         lateinit var gameprovider: Configuration
         lateinit var gameproviderLibrary: Configuration
-
     }
 
     override fun apply(project: Project) {
@@ -47,7 +43,6 @@ abstract class LunarCoreRunnerPlugin : Plugin<Project> {
         gameproviderLibrary.exclude(mapOf("module" to "gson"))
         gameproviderLibrary.exclude(mapOf("module" to "guava"))
 
-        project.tasks.register("runServer", RunServerTask::class.java) { task ->
-        }
+        project.tasks.register("runServer", RunServerTask::class.java)
     }
 }

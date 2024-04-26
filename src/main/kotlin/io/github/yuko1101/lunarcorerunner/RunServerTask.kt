@@ -70,7 +70,7 @@ abstract class RunServerTask : JavaExec() {
         } ?: throw IllegalStateException("Main-Class not found in the manifest of the mod jar")
 
         val mixinJar = libraryJars.first { it.name.contains("mixin") }
-        // loads mods from classpath, and debug your mixin with hot-swapping
+        // loads mods from classpath, and debug mixin with hot-swapping
         this.jvmArgs("-Dfabric.development=true", "-javaagent:${mixinJar.absolutePath}")
 
         val cp = serverClassPath.joinToString(";") { runDir.toPath().relativize(it.toPath()).toString() }
