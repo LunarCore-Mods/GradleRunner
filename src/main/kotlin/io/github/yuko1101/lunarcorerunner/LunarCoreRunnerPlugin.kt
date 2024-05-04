@@ -3,6 +3,10 @@ package io.github.yuko1101.lunarcorerunner
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.type.ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE
+import org.gradle.api.attributes.Attribute
+import org.gradle.internal.impldep.com.google.gson.JsonParser
+import java.io.File
 
 abstract class LunarCoreRunnerPlugin : Plugin<Project> {
 
@@ -44,5 +48,37 @@ abstract class LunarCoreRunnerPlugin : Plugin<Project> {
         gameproviderLibrary.exclude(mapOf("module" to "guava"))
 
         project.tasks.register("runServer", RunServerTask::class.java)
+
+        project.afterEvaluate {
+            val accessWidener = getAccessWidener(project) ?: return@afterEvaluate
+
+            val widened = Attribute.of("widened", Boolean::class.javaObjectType)
+
+            project.dependencies.attributesSchema.attribute(widened)
+            project.dependencies.artifactTypes.getByName("jar") {
+                it.attributes.attribute(widened, false)
+            }
+            project.dependencies.registerTransform(AccessWidenerTransformer::class.java) {
+                it.from.attribute(widened, false).attribute(ARTIFACT_TYPE_ATTRIBUTE, "jar")
+                it.to.attribute(widened, true).attribute(ARTIFACT_TYPE_ATTRIBUTE, "jar")
+                it.parameters.wideners.set(listOf(accessWidener.readText()))
+            }
+            project.configurations.all {
+                if (it.isCanBeResolved) {
+                    it.attributes.attribute(widened, true)
+                }
+            }
+        }
+    }
+
+    private fun getAccessWidener(project: Project): File? {
+        val modJsonFile = project.file("src/main/resources/fabric.mod.json")
+        if (!modJsonFile.exists()) return null
+
+        val modJson = JsonParser.parseReader(modJsonFile.reader()).asJsonObject
+        if (!modJson.has("accessWidener")) return null
+
+        val accessWidener = modJson.get("accessWidener").asString
+        return File(modJsonFile.parentFile, accessWidener)
     }
 }
