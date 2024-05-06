@@ -7,8 +7,6 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
 import java.io.File
-import java.util.jar.JarInputStream
-import java.util.jar.Manifest
 
 @DisableCachingByDefault
 abstract class RunServerTask : JavaExec() {
@@ -19,13 +17,7 @@ abstract class RunServerTask : JavaExec() {
 
     init {
         this.dependsOn("jar")
-
-        val cachedGameProviderJar = getCachedGameProviderJar()
-        val mainClass: String = cachedGameProviderJar.inputStream().use { stream ->
-            val manifest: Manifest? = JarInputStream(stream).use { it.manifest }
-            manifest?.mainAttributes?.getValue("Main-Class")
-        } ?: throw IllegalStateException("Main-Class not found in the manifest of the mod jar")
-        this.mainClass.set(mainClass)
+        mainClass.set("io.github.yuko1101.provider.Main")
     }
 
     private fun getCachedGameProviderJar(): File {
@@ -64,17 +56,12 @@ abstract class RunServerTask : JavaExec() {
         val serverClassPath = project.files(lunarCoreJar, gameProviderJar, *libraryJars.toTypedArray())
         this.classpath = serverClassPath.plus(project.files(modFile))
 
-        val mainClass: String = gameProviderJar.inputStream().use { stream ->
-            val manifest: Manifest? = JarInputStream(stream).use { it.manifest }
-            manifest?.mainAttributes?.getValue("Main-Class")
-        } ?: throw IllegalStateException("Main-Class not found in the manifest of the mod jar")
-
         val mixinJar = libraryJars.first { it.name.contains("mixin") }
         // loads mods from classpath, and debug mixin with hot-swapping
         this.jvmArgs("-Dfabric.development=true", "-javaagent:${mixinJar.absolutePath}")
 
         val cp = serverClassPath.joinToString(";") { runDir.toPath().relativize(it.toPath()).toString() }
-        File(runDir, "args.txt").writeText("-cp $cp\n$mainClass")
+        File(runDir, "args.txt").writeText("-cp $cp\n${mainClass.get()}")
 
         this.standardInput = System.`in`
         this.isIgnoreExitValue = true
