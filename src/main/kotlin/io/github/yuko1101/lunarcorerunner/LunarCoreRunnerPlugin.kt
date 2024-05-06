@@ -1,11 +1,11 @@
 package io.github.yuko1101.lunarcorerunner
 
+import com.google.gson.JsonParser
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.type.ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE
 import org.gradle.api.attributes.Attribute
-import org.gradle.internal.impldep.com.google.gson.JsonParser
 import java.io.File
 
 abstract class LunarCoreRunnerPlugin : Plugin<Project> {

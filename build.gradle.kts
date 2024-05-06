@@ -19,10 +19,11 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(gradleApi())
-    implementation("net.fabricmc:access-widener:2.1.0")
-    implementation("org.ow2.asm:asm-commons:9.4")
+    shade(group = "net.fabricmc", name = "access-widener", version = "2.1.0")
+    shade(group = "org.ow2.asm", name = "asm-commons", version = "9.4")
+    shade(group = "com.google.code.gson", name = "gson", version = "2.10.1")
 
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
+    testImplementation(group = "org.jetbrains.kotlin", name = "kotlin-test")
 }
 
 tasks.test {
@@ -31,6 +32,10 @@ tasks.test {
 
 tasks.jar {
     dependsOn(tasks.shadowJar)
+}
+
+tasks.shadowJar {
+    configurations = listOf(shade)
 }
 
 kotlin {
