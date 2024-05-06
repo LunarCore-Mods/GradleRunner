@@ -48,7 +48,7 @@ abstract class AccessWidenerTransformer : TransformAction<AccessWidenerTransform
         println("Transforming ${inputArtifact.get().asFile.name} with access widener")
 
         val inputFile = inputArtifact.get().asFile
-        val outputFile = outputs.file(inputFile.name)
+        val outputFile = outputs.file("widened-${inputFile.name}")
 
         JarInputStream(inputFile.inputStream()).use { input ->
             JarOutputStream(outputFile.outputStream()).use { output ->
