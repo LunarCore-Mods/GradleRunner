@@ -5,7 +5,7 @@ plugins {
     `maven-publish`
 }
 
-group = "io.github.yuko1101"
+group = "io.github.lunarcoremods"
 version = "1.0-SNAPSHOT"
 
 val shade: Configuration = configurations.register("shade") {

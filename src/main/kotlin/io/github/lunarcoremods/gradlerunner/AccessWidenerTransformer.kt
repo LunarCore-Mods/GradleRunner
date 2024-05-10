@@ -1,4 +1,4 @@
-package io.github.yuko1101.lunarcorerunner
+package io.github.lunarcoremods.gradlerunner
 
 import net.fabricmc.accesswidener.AccessWidener
 import net.fabricmc.accesswidener.AccessWidenerClassVisitor

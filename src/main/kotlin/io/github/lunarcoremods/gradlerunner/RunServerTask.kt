@@ -1,4 +1,4 @@
-package io.github.yuko1101.lunarcorerunner
+package io.github.lunarcoremods.gradlerunner
 
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -17,7 +17,7 @@ abstract class RunServerTask : JavaExec() {
 
     init {
         this.dependsOn("jar")
-        mainClass.set("io.github.yuko1101.provider.Main")
+        mainClass.set("io.github.lunarcoremods.provider.Main")
     }
 
     private fun getCachedGameProviderJar(): File {

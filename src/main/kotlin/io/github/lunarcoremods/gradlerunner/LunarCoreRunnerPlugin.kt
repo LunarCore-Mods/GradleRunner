@@ -1,4 +1,4 @@
-package io.github.yuko1101.lunarcorerunner
+package io.github.lunarcoremods.gradlerunner
 
 import com.google.gson.JsonParser
 import org.gradle.api.Plugin
