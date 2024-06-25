@@ -3,6 +3,7 @@ package io.github.lunarcoremods.gradlerunner
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
@@ -10,10 +11,14 @@ import java.io.File
 
 @DisableCachingByDefault
 abstract class RunServerTask : JavaExec() {
+
     @OutputDirectory
-    val runDir: Property<File> = this.objectFactory.property(File::class.java).apply { set(project.file("run")) }
+    @Optional
+    val runDir: Property<File> = this.objectFactory.property(File::class.java)
+
     @Input
-    val putModJar: Property<Boolean> = this.objectFactory.property(Boolean::class.java).apply { set(true) }
+    @Optional
+    val putModJar: Property<Boolean> = this.objectFactory.property(Boolean::class.java)
 
     init {
         this.dependsOn("jar")
@@ -31,14 +36,14 @@ abstract class RunServerTask : JavaExec() {
 
         val gameProviderLibraries: List<File> = LunarCoreRunnerPlugin.gameproviderLibrary.toList()
 
-        val runDir = this.runDir.get()
+        val runDir = this.runDir.getOrElse(project.file(System.getenv("LUNARCORE_DIR") ?: "run"))
         val librariesDir = File(runDir, "libraries")
         if (!librariesDir.exists()) librariesDir.mkdirs()
         val modsDir = File(runDir, "mods")
         if (!modsDir.exists()) modsDir.mkdir()
 
         var modFile = project.tasks.getByName("jar").outputs.files.singleFile
-        if (putModJar.get()) modFile = modFile.copyTo(File(modsDir, modFile.name), true)
+        if (putModJar.getOrElse(true)) modFile = modFile.copyTo(File(modsDir, modFile.name), true)
 
         val lunarCoreJar = File(runDir, lunarCoreFile.name)
         lunarCoreFile.copyTo(lunarCoreJar, true)
